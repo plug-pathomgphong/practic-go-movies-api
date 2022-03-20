@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -172,4 +173,76 @@ func (m *DBModel) GenresAll() ([]*Genre, error) {
 	}
 
 	return genres, nil
+}
+
+func (m *DBModel) InsertMovie(movie Movie) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `insert into movies (title, description, year, release_date, runtime, rating, mpaa_rating, created_at, updated_at) 
+				values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+
+	_, err := m.DB.ExecContext(ctx, stmt,
+		movie.Title,
+		movie.Description,
+		movie.Year,
+		movie.ReleaseDate,
+		movie.Runtime,
+		movie.Rating,
+		movie.MPAARating,
+		movie.CreatedAt,
+		movie.UpdatedAt,
+	)
+	if err != nil {
+		log.Panicln(err)
+		return err
+	}
+	return nil
+}
+
+func (m *DBModel) UpdateMovie(movie Movie) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `update movies 
+				set title = $1, 
+					description = $2, 
+					year = $3, 
+					release_date = $4, 
+					runtime = $5, 
+					rating = $6, 
+					mpaa_rating = $7,
+					updated_at = $8
+				where id = $9`
+
+	_, err := m.DB.ExecContext(ctx, stmt,
+		movie.Title,
+		movie.Description,
+		movie.Year,
+		movie.ReleaseDate,
+		movie.Runtime,
+		movie.Rating,
+		movie.MPAARating,
+		movie.UpdatedAt,
+		movie.ID,
+	)
+	if err != nil {
+		log.Panicln(err)
+		return err
+	}
+	return nil
+}
+
+func (m *DBModel) DeleteMovie(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := "delete from movies where id = $1"
+
+	_, err := m.DB.ExecContext(ctx, stmt, id)
+	if err != nil {
+		log.Panicln(err)
+		return err
+	}
+	return nil
 }
