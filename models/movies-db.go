@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -71,12 +72,17 @@ func (m *DBModel) Get(id int) (*Movie, error) {
 }
 
 // All returns all movie and error, if any
-func (m *DBModel) All() ([]*Movie, error) {
+func (m *DBModel) All(genre ...int) ([]*Movie, error) { // ...int ถ้าไม่ใส่ Ellipsis จะเป็นการ require parameter แล้ว  app.models.DB.All() จะ error
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := `SELECT id, title, description, year, release_date, runtime, rating, mpaa_rating, created_at, updated_at 
-				FROM movies order by title`
+	where := ""
+	if len(genre) > 0 {
+		where = fmt.Sprintf("where id in (select movie_id from movies_genres where genre_id = %d)", genre[0])
+	}
+
+	query := fmt.Sprintf(`SELECT id, title, description, year, release_date, runtime, rating, mpaa_rating, created_at, updated_at 
+				FROM movies %s order by title`, where)
 
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
@@ -133,4 +139,37 @@ func (m *DBModel) All() ([]*Movie, error) {
 	}
 
 	return movies, nil
+}
+
+func (m *DBModel) GenresAll() ([]*Genre, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `SELECT id, genre_name, created_at, updated_at 
+				FROM genres order by genre_name`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var genres []*Genre
+
+	for rows.Next() {
+		var g Genre
+		err := rows.Scan(
+			&g.ID,
+			&g.GenreName,
+			&g.CreatedAt,
+			&g.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		genres = append(genres, &g)
+	}
+
+	return genres, nil
 }
