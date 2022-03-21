@@ -54,7 +54,7 @@ func (app *application) Signin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, jwtBytes, "response")
+	err = app.writeJSON(w, http.StatusOK, string(jwtBytes), "response")
 	if err != nil {
 		app.errorJSON(w, err)
 		return
