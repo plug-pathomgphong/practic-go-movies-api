@@ -10,6 +10,12 @@ type Models struct {
 	DB DBModel
 }
 
+type User struct {
+	ID       int
+	Email    string
+	Password string
+}
+
 // NewModels retturns models with db pool
 func NewModels(db *sql.DB) Models {
 	return Models{

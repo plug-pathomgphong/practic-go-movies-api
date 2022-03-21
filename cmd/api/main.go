@@ -23,6 +23,9 @@ type config struct {
 	db   struct {
 		dsn string
 	}
+	jwt struct {
+		secret string
+	}
 }
 
 type application struct {
@@ -51,6 +54,8 @@ func main() {
 	dbName := os.Getenv("DB_NAME")
 	dbSSLMode := os.Getenv("DB_SSL_MODE")
 
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+
 	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", dbUsername, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
 
 	var cfg config
@@ -58,6 +63,7 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "Server port ti listen on")
 	flag.StringVar(&cfg.env, "env", "development", "Application enviroment (development|production)")
 	flag.StringVar(&cfg.db.dsn, "dsn", dbURL, "Postgrest connection string.")
+	flag.StringVar(&cfg.jwt.secret, "jwt-secret", jwtSecretKey, "secret")
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
