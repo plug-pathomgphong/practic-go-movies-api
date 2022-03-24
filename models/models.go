@@ -36,6 +36,7 @@ type Movie struct {
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	MovieGenre  map[int]string `json:"genres"`
+	Poster      string         `json:"poster"`
 }
 
 // Genre is the type for genres
